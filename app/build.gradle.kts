@@ -3,14 +3,13 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    // 1. ADD HILT AND KAPT PLUGINS
     alias(libs.plugins.hilt.android)
-    id("org.jetbrains.kotlin.kapt") // You can also add kapt as a plugin alias if you prefer
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
     namespace = "com.vibol.recipe"
-    compileSdk = 34 // It's common to use an integer here, 34 is the latest stable
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.vibol.recipe"
@@ -41,7 +40,6 @@ android {
     buildFeatures {
         compose = true
     }
-    // Add this for Compose versions, it's good practice
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8"
     }
@@ -57,22 +55,29 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
-    // --- 2. ADD HILT DEPENDENCIES ---
+    // --- THIS IS THE FIX ---
+    // Add the library for all Material Design icons
+    implementation(libs.androidx.material.icons.extended)
+
+
+    // Hilt Dependencies
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
 
-    // --- Also add the other required libraries from our plan ---
-    // Retrofit
+    // Networking
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    // Room
+    // Database
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    // Navigation Compose
+    // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    // ... etc.
+    // Image Loading
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    // DataStore
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
 
     testImplementation(libs.junit)
@@ -82,14 +87,8 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    implementation("io.coil-kt:coil-compose:2.6.0")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }
 
-// Add this line at the very end of the file for Kapt
 kapt {
     correctErrorTypes = true
 }

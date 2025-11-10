@@ -22,7 +22,16 @@ data class MealDto(
     @SerializedName("mealThumb")
     val imageUrl: String?,
 
-    // This single line replaces all 40 of the old ingredient/measure fields
     @SerializedName("ingredients")
-    val ingredients: List<IngredientDto>?
+    val ingredients: List<IngredientDto>?,
+
+    // --- ADD THESE NEW FIELDS ---
+    @SerializedName("tags")
+    val tags: String?,
+
+    @SerializedName("youtube")
+    val youtube: String?,
+
+    @SerializedName("source")
+    val source: String?
 )

@@ -20,13 +20,11 @@ class RecipeRepositoryImpl @Inject constructor(
 
     override suspend fun getMeals(): List<Meal> {
         return api.getMeals(Constants.DB_NAME_HEADER)
-            .filter { !it.id.isNullOrBlank() } // Keep this filter for safety
+            .filter { !it.id.isNullOrBlank() }
             .map { it.toDomainMeal() }
     }
 
     override suspend fun getCategories(): List<Category> {
-        // This is based on the older API structure, assuming categories are still the same.
-        // If categories also fail, we will need to check that DTO as well.
         return api.getCategories(Constants.DB_NAME_HEADER)
             .filter { !it.id.isNullOrBlank() }
             .map {
@@ -37,12 +35,25 @@ class RecipeRepositoryImpl @Inject constructor(
     override fun getFavorites(): Flow<List<Meal>> {
         return dao.getFavorites().map { entities ->
             entities.map {
-                Meal(id = it.mealId, name = it.name, imageUrl = it.imageUrl, "", "", "", emptyList())
+                // UPDATED: Added default values for the new fields (tags, youtubeUrl, sourceUrl)
+                Meal(
+                    id = it.mealId,
+                    name = it.name,
+                    imageUrl = it.imageUrl,
+                    category = "", // Not stored in favorites table
+                    area = "", // Not stored
+                    instructions = "", // Not stored
+                    ingredients = emptyList(), // Not stored
+                    tags = emptyList(), // Not stored
+                    youtubeUrl = null, // Not stored
+                    sourceUrl = null // Not stored
+                )
             }
         }
     }
 
     override suspend fun saveFavorite(meal: Meal) {
+        // This remains the same as FavoriteMealEntity only stores basic info
         val entity = FavoriteMealEntity(mealId = meal.id, name = meal.name, imageUrl = meal.imageUrl)
         dao.saveFavorite(entity)
     }
@@ -56,18 +67,15 @@ class RecipeRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getMealById(mealId: String): Meal? {
-        // Fetch all meals and then find the specific one by its ID.
         return api.getMeals(Constants.DB_NAME_HEADER)
             .map { it.toDomainMeal() }
             .find { it.id == mealId }
     }
 }
 
-// THIS MAPPING LOGIC IS NOW MUCH SIMPLER AND CORRECT
+// UPDATED: This function now maps the new fields
 private fun MealDto.toDomainMeal(): Meal {
-    // Safely map the new ingredients list
     val ingredientList = this.ingredients?.mapNotNull { ingredientDto ->
-        // Combine measure and ingredient, only if ingredient is not blank
         if (!ingredientDto.ingredient.isNullOrBlank()) {
             "${ingredientDto.measure ?: ""} ${ingredientDto.ingredient}".trim()
         } else {
@@ -75,13 +83,23 @@ private fun MealDto.toDomainMeal(): Meal {
         }
     } ?: emptyList()
 
+    // NEW LOGIC: Split the tags string into a list of strings
+    val tagsList = this.tags
+        ?.split(",")
+        ?.filter { it.isNotBlank() }
+        ?: emptyList()
+
     return Meal(
-        id = this.id!!, // We can use !! because we filtered nulls
+        id = this.id!!,
         name = this.name ?: "Unknown Meal",
         imageUrl = this.imageUrl ?: "",
         category = this.category ?: "Unknown",
         area = this.area ?: "Unknown",
         instructions = this.instructions ?: "",
-        ingredients = ingredientList
+        ingredients = ingredientList,
+        // --- MAP THE NEW FIELDS ---
+        tags = tagsList,
+        youtubeUrl = this.youtube,
+        sourceUrl = this.source
     )
 }

@@ -8,5 +8,10 @@ data class Meal(
     val category: String,
     val area: String,
     val instructions: String,
-    val ingredients: List<String>
+    val ingredients: List<String>,
+
+    // --- ADD THESE NEW FIELDS ---
+    val tags: List<String>,
+    val youtubeUrl: String?,
+    val sourceUrl: String?
 )
