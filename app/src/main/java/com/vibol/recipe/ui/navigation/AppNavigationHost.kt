@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -26,17 +27,28 @@ fun AppNavigationHost() {
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            // Home Screen Destination
+            // --- Home Screen Destination (FIXED) ---
             composable(Screen.Home.route) {
                 HomeScreen(
                     onMealClick = { mealId ->
                         navController.navigate(Screen.MealDetail.createRoute(mealId))
+                    },
+                    // ADDED the missing onCategoryClick lambda
+                    onCategoryClick = { categoryName ->
+                        navController.navigate(Screen.Explore.createRoute(categoryName))
                     }
                 )
             }
 
-            // Explore Screen Destination
-            composable(Screen.Explore.route) {
+            // --- Explore Screen Destination (FIXED) ---
+            composable(
+                route = Screen.Explore.route,
+                // ADDED the argument definition
+                arguments = listOf(navArgument("category") {
+                    type = NavType.StringType
+                    nullable = true
+                })
+            ) {
                 ExploreScreen(
                     onMealClick = { mealId ->
                         navController.navigate(Screen.MealDetail.createRoute(mealId))
@@ -44,7 +56,7 @@ fun AppNavigationHost() {
                 )
             }
 
-            // Favorite Screen Destination
+            // --- Favorite Screen Destination (Correct) ---
             composable(Screen.Favorite.route) {
                 FavoriteScreen(
                     onMealClick = { mealId ->
@@ -53,10 +65,10 @@ fun AppNavigationHost() {
                 )
             }
 
-            // Meal Detail Screen Destination
+            // --- Meal Detail Screen Destination (Correct) ---
             composable(
                 route = Screen.MealDetail.route,
-                arguments = listOf(navArgument("mealId") { type = androidx.navigation.NavType.StringType })
+                arguments = listOf(navArgument("mealId") { type = NavType.StringType })
             ) {
                 MealDetailScreen()
             }

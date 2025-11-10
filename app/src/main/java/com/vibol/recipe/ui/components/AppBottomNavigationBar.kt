@@ -15,6 +15,12 @@ import com.vibol.recipe.ui.navigation.Screen
 @Composable
 fun AppBottomNavigationBar(navController: NavController) {
     val items = listOf(
+        Screen.Home,
+        Screen.Explore,
+        Screen.Favorite
+    )
+
+    val icons = mapOf(
         Screen.Home to Icons.Default.Home,
         Screen.Explore to Icons.Default.Search,
         Screen.Favorite to Icons.Default.Favorite
@@ -24,21 +30,19 @@ fun AppBottomNavigationBar(navController: NavController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar {
-        items.forEach { (screen, icon) ->
+        items.forEach { screen ->
+            val baseRoute = screen.route.substringBefore("?")
             NavigationBarItem(
-                icon = { Icon(icon, contentDescription = screen.route) },
-                label = { Text(screen.route.replaceFirstChar { it.uppercase() }) },
-                selected = currentRoute == screen.route,
+                icon = { Icon(icons[screen]!!, contentDescription = screen.title) },
+                label = { Text(screen.title) },
+                selected = currentRoute?.startsWith(baseRoute) == true,
                 onClick = {
-                    navController.navigate(screen.route) {
-                        // Pop up to the start destination of the graph to avoid building up a large
-                        // back stack as users select items
+                    // THIS IS THE FIX: Navigate to the base route without arguments
+                    navController.navigate(baseRoute) {
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = true
                         }
-                        // Avoid multiple copies of the same destination when re-selecting the same item
                         launchSingleTop = true
-                        // Restore state when re-selecting a previously selected item
                         restoreState = true
                     }
                 }

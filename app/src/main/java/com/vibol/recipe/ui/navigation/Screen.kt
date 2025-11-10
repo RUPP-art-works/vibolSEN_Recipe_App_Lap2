@@ -1,14 +1,18 @@
 // In ui/navigation/Screen.kt
 package com.vibol.recipe.ui.navigation
 
-// A sealed class to define the navigation routes in the app
-sealed class Screen(val route: String) {
-    object Home : Screen("home")
-    object Explore : Screen("explore")
-    object Favorite : Screen("favorite")
-    // We add a placeholder for the mealId that we will pass to the detail screen
-    object MealDetail : Screen("meal_detail/{mealId}") {
-        // Helper function to create the route with a specific meal ID
+// UPDATED: Added a 'title' property for user-friendly names
+sealed class Screen(val route: String, val title: String) {
+    object Home : Screen("home", "Home")
+
+    object Explore : Screen("explore?category={category}", "Explore") {
+        fun createRoute(category: String) = "explore?category=$category"
+    }
+
+    object Favorite : Screen("favorite", "Favorite")
+
+    // The detail screen doesn't need a title for the bottom bar
+    object MealDetail : Screen("meal_detail/{mealId}", "Meal Detail") {
         fun createRoute(mealId: String) = "meal_detail/$mealId"
     }
 }

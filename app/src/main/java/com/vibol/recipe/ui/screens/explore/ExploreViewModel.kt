@@ -1,6 +1,7 @@
 // In ui/screens/explore/ExploreViewModel.kt
 package com.vibol.recipe.ui.screens.explore
 
+import androidx.lifecycle.SavedStateHandle // <-- IMPORT THIS
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vibol.recipe.domain.repository.RecipeRepository
@@ -13,17 +14,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExploreViewModel @Inject constructor(
-    private val recipeRepository: RecipeRepository
+    private val recipeRepository: RecipeRepository,
+    savedStateHandle: SavedStateHandle // <-- INJECT THIS
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ExploreState())
     val state = _state.asStateFlow()
 
+    // Get the category passed from the Home screen, if it exists
+    private val initialCategory: String? = savedStateHandle.get<String>("category")
+
     init {
         loadExploreData()
     }
 
-    // Function to be called when a filter chip is clicked
     fun onCategorySelected(category: String) {
         _state.update { it.copy(selectedCategory = category) }
         filterMeals()
@@ -39,10 +43,11 @@ class ExploreViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         allMeals = meals,
-                        categories = categories
+                        categories = categories,
+                        // If an initial category was passed, use it. Otherwise, default to "All".
+                        selectedCategory = initialCategory ?: "All"
                     )
                 }
-                // Apply the initial "All" filter
                 filterMeals()
             } catch (e: Exception) {
                 _state.update {
@@ -52,8 +57,8 @@ class ExploreViewModel @Inject constructor(
         }
     }
 
-    // The core filtering logic
     private fun filterMeals() {
+        // ... (this function does not need to change)
         val currentState = _state.value
         val filteredList = if (currentState.selectedCategory == "All") {
             currentState.allMeals

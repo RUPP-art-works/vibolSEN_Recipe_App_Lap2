@@ -26,11 +26,12 @@ import coil.compose.AsyncImage
 import com.vibol.recipe.domain.model.Category
 import com.vibol.recipe.domain.model.Meal
 
-// UPDATED FUNCTION SIGNATURE
+// UPDATED: The function signature now includes onCategoryClick
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onMealClick: (String) -> Unit // New parameter to handle navigation clicks
+    onMealClick: (String) -> Unit,
+    onCategoryClick: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -53,7 +54,6 @@ fun HomeScreen(
                 item {
                     state.randomMeal?.let { meal ->
                         SectionTitle(title = "Random Suggestion")
-                        // UPDATED: Pass the click event up with the meal's ID
                         RandomMealCard(meal = meal, onClick = { onMealClick(meal.id) })
                     }
                 }
@@ -68,7 +68,6 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(state.popularMeals) { meal ->
-                            // UPDATED: Pass the click event up with the meal's ID
                             MealCard(meal = meal, onClick = { onMealClick(meal.id) })
                         }
                     }
@@ -84,8 +83,11 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(state.categories) { category ->
-                            // TODO: This click will be implemented in a future step
-                            CategoryCard(category = category, onClick = { })
+                            // UPDATED: The onClick now uses the new onCategoryClick lambda
+                            CategoryCard(
+                                category = category,
+                                onClick = { onCategoryClick(category.name) }
+                            )
                         }
                     }
                 }
@@ -94,6 +96,7 @@ fun HomeScreen(
     }
 }
 
+// Reusable composable for section titles
 @Composable
 fun SectionTitle(title: String) {
     Text(
@@ -104,6 +107,7 @@ fun SectionTitle(title: String) {
     )
 }
 
+// Composable for the large random meal card
 @Composable
 fun RandomMealCard(meal: Meal, onClick: () -> Unit) {
     Card(
@@ -123,7 +127,7 @@ fun RandomMealCard(meal: Meal, onClick: () -> Unit) {
             )
             Text(
                 text = meal.name,
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.onSurface, // Adjusted for better contrast on images
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
                 modifier = Modifier
@@ -134,6 +138,7 @@ fun RandomMealCard(meal: Meal, onClick: () -> Unit) {
     }
 }
 
+// Composable for the smaller popular meal cards
 @Composable
 fun MealCard(meal: Meal, onClick: () -> Unit) {
     Card(
@@ -161,6 +166,7 @@ fun MealCard(meal: Meal, onClick: () -> Unit) {
     }
 }
 
+// Composable for the category cards
 @Composable
 fun CategoryCard(category: Category, onClick: () -> Unit) {
     Card(
